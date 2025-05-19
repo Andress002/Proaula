@@ -46,12 +46,14 @@ export class AdminHotelsService {
         const user = await this.usersRepository.findOne({
             where: { id: data.user.id },
         })
-        if (!user) throw new Error('User not found');
+        if (!user) throw new NotFoundException('User not found');
+        
         const hotel = await this.hotelsRepository.findOne({
             where: { id: data.hotel.id },
         })
-        if (!hotel) throw new Error('Hotel not found');
-        const newAdminHotels = this.adminHotelsRepository.save(data);
+        if (!hotel) throw new NotFoundException('Hotel not found');
+        
+        const newAdminHotels = await this.adminHotelsRepository.save(data);
         return newAdminHotels;
     }
 

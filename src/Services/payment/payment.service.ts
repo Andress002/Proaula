@@ -31,7 +31,7 @@ export class PaymentService {
 
     async create(payment: Payment): Promise<{ payment: Payment}> {
         if (payment.price <= 0) throw new Error('the price must be greater than 0');
-        if (!['PREMIUN', 'VIP'].includes(payment.name)) throw new Error('the name must be PREMIUN or VIP');
+        if (!['PREMIUN', 'VIP','BASIC'].includes(payment.name)) throw new Error('the name must be PREMIUN or VIP or BASIC');
         payment.active = true;
         const newPayment = this.paymentRepository.create(payment);
         const savedPayment = await this.paymentRepository.save(newPayment);
