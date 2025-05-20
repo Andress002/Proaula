@@ -26,6 +26,30 @@ export class RoomsService {
         return rooms
     }
 
+    async findRoomsByHotel(hotelId: number): Promise<Room[]> {
+        const rooms = await this.roomsRepository.find({
+            where: { hotel: { id: hotelId } },
+            relations: ['hotel', 'reservation']
+        });
+
+        if (rooms.length === 0) throw new NotFoundException('No rooms found for this hotel');
+
+        return rooms.map(room => {
+            if (room.image) {
+                const baseUrl = 'http://localhost:3000';
+                const normalizedPath = room.image.replace(/\\/g, '/');
+                if (!normalizedPath.startsWith(baseUrl)) {
+                    room.image = `${baseUrl}/${normalizedPath}`;
+                } else {
+                    room.image = normalizedPath;
+                }
+            } else {
+                room.image = 'No tiene imagen';
+            }
+            return room;
+        });
+    }
+
     async findAllWithImage(): Promise<Room[]> {
         const rooms = await this.roomsRepository.find({
             relations: ['hotel', 'reservation']

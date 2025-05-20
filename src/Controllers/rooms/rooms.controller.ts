@@ -22,6 +22,11 @@ export class RoomsController {
         return await this.roomsService.findAllWithImage()
     }
 
+    @Get('all/hotel/:id')
+    async findAllRoomsByHotel(@Param('id') id: number){
+        return await this.roomsService.findRoomsByHotel(id)
+    }
+
     @Get(':id')
     async findById(@Param('id') id: number){
         return await this.roomsService.findById(id)
