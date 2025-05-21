@@ -26,7 +26,6 @@ import { PaymentController } from './Controllers/payment/payment.controller';
 import { Payment } from './Models/payment_services.models';
 import { AuthModule } from './auth/auth.module';
 import { HttpModule } from '@nestjs/axios';
-
 import { super_admin } from './Models/super_admin.models';
 import { SuperAdminService } from './Services/super_admin/super_admin.service';
 import { SuperAdminController } from './Controllers/super_admin/super_admin.controller';
@@ -35,13 +34,12 @@ import { SuperAdminController } from './Controllers/super_admin/super_admin.cont
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: '123456',
-      database: 'quantum_saas',
+      url: process.env.DATABASE_URL || 'postgresql://postgres:123456@localhost:5432/quantum_saas',
       entities: [__dirname + '/**/*.models{.ts,.js}'],
-      synchronize: true,
+      synchronize: process.env.NODE_ENV !== 'production',
+      ssl: process.env.NODE_ENV === 'production' ? {
+        rejectUnauthorized: false
+      } : false
     }),
     TypeOrmModule.forFeature([
       User,
