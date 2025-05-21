@@ -40,7 +40,7 @@ export class PaymentBookingService {
     async findAllByClient(id: number): Promise<PaymentReservation[]> {
         const payment = await this.paymentBookingRepository.find({
             where: { client: {id: id}},
-            relations: ['reservation']
+            relations: ['reservation', 'client', 'room']
         })
         if ( payment.length === 0) throw new NotFoundException('No payment found')
         return payment
