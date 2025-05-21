@@ -22,42 +22,8 @@ const pool = new Pool({
     } : false
 });
 
-async function waitForTables() {
-    const maxAttempts = 10;
-    const delay = 2000; // 2 segundos
-
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        try {
-            // Verificar si las tablas existen
-            const result = await pool.query(`
-                SELECT EXISTS (
-                    SELECT FROM information_schema.tables 
-                    WHERE table_name = 'client'
-                );
-            `);
-            
-            if (result.rows[0].exists) {
-                console.log('✅ Las tablas están listas');
-                return true;
-            }
-            
-            console.log(`Intento ${attempt}/${maxAttempts}: Esperando a que las tablas estén listas...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-        } catch (error) {
-            console.log(`Intento ${attempt}/${maxAttempts}: Error verificando tablas:`, error.message);
-            await new Promise(resolve => setTimeout(resolve, delay));
-        }
-    }
-    
-    throw new Error('No se pudieron encontrar las tablas después de varios intentos');
-}
-
 async function insertData() {
     try {
-        console.log('🔄 Esperando a que las tablas estén listas...');
-        await waitForTables();
-        
-        console.log('🔄 Iniciando inserción de datos...');
         fs.writeFileSync('passwords.txt', '');
 
         await pool.query('TRUNCATE TABLE "payment_reservation", "reservation", "room", "admin_hotels", "hotel", "payment_services", "client", "user" CASCADE');
@@ -249,9 +215,6 @@ async function insertData() {
         console.log('✅ Datos generados correctamente');
     } catch (error) {
         console.error('❌ Error generando datos:', error);
-        process.exit(1); // Salir con error para que Render sepa que algo falló
-    } finally {
-        await pool.end();
     }
 }
 
