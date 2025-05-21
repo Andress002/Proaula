@@ -7,15 +7,8 @@ services:
       npm install -g @nestjs/cli
       npm run build
     startCommand: node dist/main
-    migrateCommand: npm run migration:run
     envVars:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        sync: false
-      - key: JWT_SECRET
-        sync: false
-      - key: JWT_EXPIRATION
-        sync: false
-      - key: PORT
-        value: 10000 
+        sync: false 
