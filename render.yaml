@@ -11,6 +11,7 @@ services:
     migrateCommand: |
       cd quantum_saas
       npm run migration:run
+      sleep 5
       cd Database
       npm install
       node main.js
