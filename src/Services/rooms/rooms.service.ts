@@ -5,7 +5,9 @@ import * as path from 'path';
 import { AdminHotels } from 'src/Models/admins_hotels.models';
 import { Hotel } from 'src/Models/hotels.models';
 import { Room } from 'src/Models/rooms.models';
-import { Repository } from 'typeorm';
+import { Repository, Not, ILike } from 'typeorm';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @Injectable()
 export class RoomsService {
@@ -19,206 +21,162 @@ export class RoomsService {
     ){}
 
     async findAll(): Promise<Room[]> {
-        const rooms = await this.roomsRepository.find({
-            relations: ['hotel', 'reservation']
-        })
-        if ( rooms.length === 0) throw new NotFoundException('No rooms found')
-        return rooms
-    }
-
-    async findRoomsByHotel(hotelId: number): Promise<Room[]> {
-        const rooms = await this.roomsRepository.find({
-            where: { hotel: { id: hotelId } },
-            relations: ['hotel', 'reservation']
-        });
-
-        if (rooms.length === 0) throw new NotFoundException('No rooms found for this hotel');
-
-        return rooms.map(room => {
-            if (room.image) {
-                const baseUrl = 'http://localhost:3000';
-                const normalizedPath = room.image.replace(/\\/g, '/');
-                if (!normalizedPath.startsWith(baseUrl)) {
-                    room.image = `${baseUrl}/${normalizedPath}`;
-                } else {
-                    room.image = normalizedPath;
-                }
-            } else {
-                room.image = 'No tiene imagen';
-            }
-            return room;
-        });
-    }
-
-    async findAllWithImage(): Promise<Room[]> {
-        const rooms = await this.roomsRepository.find({
-            relations: ['hotel', 'reservation']
-        });
-
-        if (rooms.length === 0) throw new NotFoundException('No rooms found');
-
-        return rooms.map(room => {
-            if (room.image) {
-                const baseUrl = 'http://localhost:3000';
-                const normalizedPath = room.image.replace(/\\/g, '/');
-                if (!normalizedPath.startsWith(baseUrl)) {
-                    room.image = `${baseUrl}/${normalizedPath}`;
-                } else {
-                    room.image = normalizedPath;
-                }
-            } else {
-                room.image = 'No tiene imagen';
-            }
-            return room;
-        });
-    }
-
-    async findById(id: number): Promise<Room> {
-        const room = await this.roomsRepository.findOne({
-            where: { id },
-            relations: ['hotel', 'reservation']
-        })
-        if (!room) throw new NotFoundException('Room not found')
-        if( room.image){
-            const baseUrl = 'http://localhost:3000'; 
-            const normalizedPath = room.image.replace(/\\/g, '/'); 
-            if (!normalizedPath.startsWith(baseUrl)) {
-                room.image = `${baseUrl}/${normalizedPath}`;
-            } else {
-                room.image = normalizedPath; 
-            }
+        const result = await this.roomsRepository.find();
+        if (result.length === 0) {
+            throw new NotFoundException('No rooms found');
         }
-        return room
+        return result;
     }
 
-    async findRoomsByAdmin(adminId: number): Promise<Room[]> {
-        const adminHotels = await this.adminHotelRepository.find({
-            where: { user: {id: adminId} },
-            relations: ['hotel', 'hotel.rooms']
-        })
-        if (adminHotels.length === 0) throw new NotFoundException('No hotels found for this admin')
-        const rooms = adminHotels.flatMap(adminHotel => adminHotel.hotel.rooms)
-        if (rooms.length === 0) throw new NotFoundException('No rooms found for this admin')
-        return rooms.map(room => {
-            if (room.image) {
-                const baseUrl = 'http://localhost:3000';
-                const normalizedPath = room.image.replace(/\\/g, '/');
-                if (!normalizedPath.startsWith(baseUrl)) {
-                    room.image = `${baseUrl}/${normalizedPath}`;
-                } else {
-                    room.image = normalizedPath;
-                }
-            } else {
-                room.image = 'No tiene imagen';
+    async findAllWithImages(): Promise<Room[]> {
+        const result = await this.roomsRepository.find({
+            where: {
+                image: Not('')
             }
-            return room;
         });
+        if (result.length === 0) {
+            throw new NotFoundException('No rooms with images found');
+        }
+        return result;
     }
 
-    async findByName(name: string): Promise<Room> {
-        const room = await this.roomsRepository.findOne(
-            { where: { name }
-        })
-        if (!room) throw new NotFoundException('Room not found')
-        return room
+    async findAllByHotel(hotelId: number): Promise<Room[]> {
+        const result = await this.roomsRepository.find({
+            where: {
+                hotel: { id: hotelId }
+            }
+        });
+        if (result.length === 0) {
+            throw new NotFoundException('No rooms found for this hotel');
+        }
+        return result;
+    }
+
+    async findOne(id: number): Promise<Room> {
+        const result = await this.roomsRepository.findOne({
+            where: { id }
+        });
+        if (!result) {
+            throw new NotFoundException('Room not found');
+        }
+        return result;
+    }
+
+    async findByName(name: string): Promise<Room[]> {
+        const result = await this.roomsRepository.find({
+            where: {
+                name: ILike(`%${name}%`)
+            }
+        });
+        if (result.length === 0) {
+            throw new NotFoundException('No rooms found with this name');
+        }
+        return result;
     }
 
     async findByStatus(status: string): Promise<Room[]> {
-        const room = await this.roomsRepository.find(
-            { where: { status }
-        })
-        if (!room) throw new NotFoundException('Room not found')
-        return room
+        const result = await this.roomsRepository.find({
+            where: { status }
+        });
+        if (result.length === 0) {
+            throw new NotFoundException('No rooms found with this status');
+        }
+        return result;
+    }
+
+    async findReservations(id: number): Promise<Room> {
+        const result = await this.roomsRepository.findOne({
+            where: { id },
+            relations: ['reservation']
+        });
+        if (!result) {
+            throw new NotFoundException('Room not found');
+        }
+        return result;
+    }
+
+    async findRoomsByAdmin(adminId: number): Promise<Room[]> {
+        const result = await this.roomsRepository.find({
+            where: {
+                hotel: {
+                    admin_hotel: {
+                        user: { id: adminId }
+                    }
+                }
+            }
+        });
+        if (result.length === 0) {
+            throw new NotFoundException('No rooms found for this admin');
+        }
+        return result;
     }
 
     async create(data: Partial<Room>, file: Express.Multer.File): Promise<Room> {
-        // Validar que se haya enviado el id del hotel
-        const hotelId = (data as any).hotelId || data.hotel?.id; // Asegúrate de manejar ambos casos
-        if (!hotelId) {
-            throw new NotFoundException('Hotel ID is required');
-        }
-
-        // Buscar el hotel en la base de datos
-        const hotel = await this.hotelsRepository.findOne({
-            where: { id: hotelId },
-        });
-        if (!hotel) {
-            throw new NotFoundException('Hotel not found');
-        }
-
-        // Manejar la imagen
-        let imagePath: string | undefined;
         if (file) {
-            imagePath = file.path;
+            const uploadPath = './uploads/rooms';
+            if (!fs.existsSync(uploadPath)) {
+                fs.mkdirSync(uploadPath, { recursive: true });
+            }
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            const filename = uniqueSuffix + extname(file.originalname);
+            fs.writeFileSync(`${uploadPath}/${filename}`, file.buffer);
+            data.image = filename;
         }
-
-        // Crear la habitación
-        const room = this.roomsRepository.create({
-            ...data,
-            hotel, // Asocia el hotel encontrado
-            image: imagePath,
-        });
-
-        // Guardar la habitación en la base de datos
-        return await this.roomsRepository.save(room);
+        const newRoom = this.roomsRepository.create(data);
+        return await this.roomsRepository.save(newRoom);
     }
 
     async update(id: number, data: Partial<Room>, file?: Express.Multer.File): Promise<Room> {
-        const existingRoom = await this.roomsRepository.findOne({ where: { id } });
-    
-        if (!existingRoom) throw new NotFoundException('Room not found');
-    
-        // Si hay un archivo nuevo
+        const roomExist = await this.roomsRepository.findOne({
+            where: { id }
+        });
+        if (!roomExist) {
+            throw new NotFoundException('Room not found');
+        }
+
         if (file) {
-            // Eliminar la imagen anterior si existe
-            if (existingRoom.image) {
-                const oldImagePath = path.join(__dirname, '..', '..', '..', existingRoom.image);
-                try {
-                    if (fs.existsSync(oldImagePath)) {
-                        fs.unlinkSync(oldImagePath);
-                        console.log('Imagen anterior eliminada:', oldImagePath);
-                    }
-                } catch (error) {
-                    console.error('Error al eliminar la imagen anterior:', error);
+            const uploadPath = './uploads/rooms';
+            if (!fs.existsSync(uploadPath)) {
+                fs.mkdirSync(uploadPath, { recursive: true });
+            }
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+            const filename = uniqueSuffix + extname(file.originalname);
+            fs.writeFileSync(`${uploadPath}/${filename}`, file.buffer);
+            data.image = filename;
+
+            // Delete old image if exists
+            if (roomExist.image) {
+                const oldImagePath = `${uploadPath}/${roomExist.image}`;
+                if (fs.existsSync(oldImagePath)) {
+                    fs.unlinkSync(oldImagePath);
                 }
             }
-            // Guardar la nueva imagen
-            data.image = file.path;
-        } else if ((data as any).currentImage) {
-            // Si no hay archivo nuevo pero hay una imagen actual, mantenerla
-            data.image = (data as any).currentImage;
-            delete (data as any).currentImage;
         }
-    
-        const room = this.roomsRepository.merge(existingRoom, data);
-    
-        // Actualizar la relación con el hotel si se proporciona
-        if (data.hotel?.id) {
-            const hotel = await this.hotelsRepository.findOne({
-                where: { id: data.hotel.id }
-            });
-            if (!hotel) throw new NotFoundException('Hotel not found');
-            room.hotel = hotel;
-        }
-    
-        return await this.roomsRepository.save(room);
+
+        const updateRoom = this.roomsRepository.merge(roomExist, data);
+        return await this.roomsRepository.save(updateRoom);
     }
-    
 
     async remove(id: number): Promise<string> {
-        const room = await this.roomsRepository.findOne({ where: { id } })
-        if (!room) throw new NotFoundException('Room not found')
-        await this.roomsRepository.remove(room)
-        return 'Room deleted successfully'
-    }
-
-    async findReservations(id: number){
         const room = await this.roomsRepository.findOne({
-            where: { id },
-            relations: ['reservation']
-        })
-        if (!room) throw new NotFoundException('Room not found')
-        if (room.reservation.length === 0) throw new NotFoundException('No reservations found')
-        return room.reservation
+            where: { id }
+        });
+        if (!room) {
+            throw new NotFoundException('Room not found');
+        }
+
+        // Delete image if exists
+        if (room.image) {
+            const imagePath = `./uploads/rooms/${room.image}`;
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
+        }
+
+        const result = await this.roomsRepository.delete(id);
+        if (result.affected === 0) {
+            throw new NotFoundException('Room not found');
+        }
+        return 'Room deleted successfully';
     }
 }

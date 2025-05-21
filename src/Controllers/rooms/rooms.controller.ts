@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UploadedFile, UseInterceptors, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { extname } from 'path';
 import * as fs from 'fs';
@@ -18,18 +18,18 @@ export class RoomsController {
     }
 
     @Get('all/images')
-    async findAllwithImages(){
-        return await this.roomsService.findAllWithImage()
+    async findAllWithImages(){
+        return await this.roomsService.findAllWithImages()
     }
 
     @Get('all/hotel/:id')
-    async findAllRoomsByHotel(@Param('id') id: number){
-        return await this.roomsService.findRoomsByHotel(id)
+    async findAllByHotel(@Param('id') id: string){
+        return await this.roomsService.findAllByHotel(parseInt(id))
     }
 
     @Get(':id')
-    async findById(@Param('id') id: number){
-        return await this.roomsService.findById(id)
+    async findOne(@Param('id') id: string){
+        return await this.roomsService.findOne(parseInt(id))
     }
 
     @Get('name/:name')
@@ -43,61 +43,54 @@ export class RoomsController {
     }
 
     @Get(':id/reservations')
-    async findReservations(@Param('id') id: number){
-        return await this.roomsService.findReservations(id)
+    async findReservations(@Param('id') id: string){
+        return await this.roomsService.findReservations(parseInt(id))
     }
 
     @Get('rooms-by-admin/:adminId')
-    async findRoomsByAdmin(@Param('adminId') adminId: number){
-        return await this.roomsService.findRoomsByAdmin(adminId)
+    async findRoomsByAdmin(@Param('adminId') adminId: string){
+        return await this.roomsService.findRoomsByAdmin(parseInt(adminId))
     }
 
     @Post('create')
-    @UseInterceptors(FileInterceptor('image',{
-        storage: diskStorage({
-            destination: (req, file, cb) => {
-                const uploadPath = './uploads/rooms';
-                if (!fs.existsSync(uploadPath)) {
-                    fs.mkdirSync(uploadPath, { recursive: true });
-                }
-                cb(null, uploadPath);
-            },
-            filename: (req, file, cb) => {
-                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-                cb(null, uniqueSuffix + extname(file.originalname));
-            }
-        })
-    }))
-    async create(@Body() data: Room, @UploadedFile() file: Express.Multer.File){
+    @UseInterceptors(FileInterceptor('file'))
+    async create(
+        @Body() data: Room,
+        @UploadedFile(
+            new ParseFilePipe({
+                validators: [
+                    new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }), // 5MB
+                    new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ }),
+                ],
+            })
+        )
+        file: Express.Multer.File
+    ){
         return await this.roomsService.create(data, file)
     }
 
     @Patch(':id')
-    @UseInterceptors(FileInterceptor('image',{
-        storage: diskStorage({
-            destination: (req, file, cb) => {
-                const uploadPath = './uploads/rooms';
-                if (!fs.existsSync(uploadPath)) {
-                    fs.mkdirSync(uploadPath, { recursive: true });
-                }
-                cb(null, uploadPath);
-            },
-            filename: (req, file, cb) => {
-                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-                cb(null, uniqueSuffix + extname(file.originalname));
-            }
-        })
-    }))
+    @UseInterceptors(FileInterceptor('file'))
     async update(
-        @Param('id') id: number, 
-        @Body() data: Partial<Room>, 
-        @UploadedFile() file?: Express.Multer.File){
-        return await this.roomsService.update(id, data, file)
+        @Param('id') id: string,
+        @Body() data: Partial<Room>,
+        @UploadedFile(
+            new ParseFilePipe({
+                validators: [
+                    new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }), // 5MB
+                    new FileTypeValidator({ fileType: /(jpg|jpeg|png)$/ }),
+                ],
+                fileIsRequired: false,
+            })
+        )
+        file?: Express.Multer.File
+    ){
+        return await this.roomsService.update(parseInt(id), data, file)
     }
 
     @Delete(':id')
-    async remove(@Param('id') id: number){
-        return await this.roomsService.remove(id)
+    async remove(@Param('id') id: string){
+        return await this.roomsService.remove(parseInt(id))
     }
 }
 
