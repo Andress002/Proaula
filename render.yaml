@@ -3,12 +3,11 @@ services:
     name: quantum-saas-backend
     env: node
     buildCommand: |
-      cd quantum_saas
       npm install
       npm install -g @nestjs/cli
       npm run build
-    startCommand: cd quantum_saas && node dist/main
-    migrateCommand: cd quantum_saas && npm run migration:run
+    startCommand: node dist/main
+    migrateCommand: npm run migration:run
     envVars:
       - key: NODE_ENV
         value: production
