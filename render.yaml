@@ -2,8 +2,11 @@ services:
   - type: web
     name: quantum-saas-backend
     env: node
-    buildCommand: npm install && npm run build
-    startCommand: npm run start:prod
+    buildCommand: |
+      npm install
+      npm install -g @nestjs/cli
+      npm run build
+    startCommand: node dist/main
     envVars:
       - key: NODE_ENV
         value: production
