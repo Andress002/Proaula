@@ -2,6 +2,7 @@ const { faker } = require('@faker-js/faker');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
+require('dotenv').config();
 
 const countriesData = {
     'Colombia': { code: '+57', cities: ['Bogotá', 'Medellín', 'Cali', 'Barranquilla', 'Cartagena', 'Santa Marta'] },
@@ -15,11 +16,10 @@ const generateStandardPhoneNumber = (country) => {
 };
 
 const pool = new Pool({
-    user: "postgres",
-    host: "localhost",
-    database: "quantum_saas",
-    password: "123456",
-    port: 5432,
+    connectionString: process.env.DATABASE_URL || `postgres://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+    ssl: process.env.NODE_ENV === 'production' ? {
+        rejectUnauthorized: false
+    } : false
 });
 
 async function insertData() {

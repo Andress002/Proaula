@@ -1,0 +1,15 @@
+{
+  "name": "quantum-saas-database",
+  "version": "1.0.0",
+  "description": "Script para poblar la base de datos de Quantum SaaS",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^8.0.0",
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.0.3",
+    "pg": "^8.14.1"
+  }
+} 
