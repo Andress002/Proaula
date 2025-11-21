@@ -38,7 +38,7 @@ import { SuperAdminController } from './Controllers/super_admin/super_admin.cont
       host: 'localhost',
       port: 5432,
       username: 'postgres',
-      password: '123456',
+      password: 'milton2003',
       database: 'quantum_saas',
       entities: [__dirname + '/**/*.models{.ts,.js}'],
       synchronize: true,
