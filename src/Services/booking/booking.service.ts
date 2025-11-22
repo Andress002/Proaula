@@ -61,8 +61,6 @@ export class BookingService {
       select: ['id', 'status', 'check_in', 'check_out'],
       order: { check_in: 'ASC' },
     });
-    if (reservation.length === 0)
-      throw new NotFoundException('No reservations found');
     return reservation;
   }
 
@@ -407,14 +405,14 @@ LEFT JOIN payment_reservation pr ON pr.reservation_id = rcm.reservation_id;`;
     const result = await this.dataSource.query(query, [hotelId, month]);
 
     // El resto de tu lógica para llamar al servicio de predicción
-    
+
     const response = await lastValueFrom(
       this.httpService.post(
         'http://localhost:8080/api/prediccion/predict',
         result,
       ),
     );
-    
+
     return response.data;
   }
 }

@@ -1,10 +1,12 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Room } from './rooms.models';
 import { Client } from './clients.models';
@@ -34,9 +36,9 @@ export class Reservation {
   @Column({ type: 'date', nullable: true })
   check_out: Date;
 
-  @Column()
+  @CreateDateColumn({ type: 'timestamp' })
   created_at: Date;
-  @Column()
+  @UpdateDateColumn({ type: 'timestamp' })
   updated_at: Date;
 
   @OneToMany(() => PaymentReservation, (payment) => payment.reservation)
