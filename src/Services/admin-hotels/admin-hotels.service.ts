@@ -7,59 +7,59 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class AdminHotelsService {
-    constructor(
-        @InjectRepository(AdminHotels)
-        private adminHotelsRepository: Repository<AdminHotels>,
-        @InjectRepository(Hotel)
-        private hotelsRepository: Repository<Hotel>,
-        @InjectRepository(User)
-        private usersRepository: Repository<User>
-    ){}
+  constructor(
+    @InjectRepository(AdminHotels)
+    private adminHotelsRepository: Repository<AdminHotels>,
+    @InjectRepository(Hotel)
+    private hotelsRepository: Repository<Hotel>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ) {}
 
-    async findHotelsByAdmin(userId: number): Promise<Hotel[]>{
-        const relations = await this.adminHotelsRepository.find({
-            where: { user: {id: userId} },
-            relations: ['hotel']
-        });
-        return relations.map(relation => relation.hotel);
-    }
+  async findHotelsByAdmin(userId: number): Promise<Hotel[]> {
+    const relations = await this.adminHotelsRepository.find({
+      where: { user: { id: userId } },
+      relations: ['hotel'],
+    });
+    return relations.map((relation) => relation.hotel);
+  }
 
-    async findHotelByAdmin(userId: number): Promise<Hotel> {
-        const relation = await this.adminHotelsRepository.findOne({
-            where: { user: {id: userId} },
-            relations: ['hotel']
-        });
+  async findHotelByAdmin(userId: number): Promise<Hotel> {
+    const relation = await this.adminHotelsRepository.findOne({
+      where: { user: { id: userId } },
+      relations: ['hotel'],
+    });
 
-        if (!relation) throw new NotFoundException('hotel not found');
-        return relation.hotel
-    }
+    if (!relation) throw new NotFoundException('hotel not found');
+    return relation.hotel;
+  }
 
-    async findAdminsByHotel(hotelId:number): Promise<User[]>{
-        const relations = await this.adminHotelsRepository.find({
-            where: { hotel: {id: hotelId} },
-            relations: ['user']
-        });
-        return relations.map(relation => relation.user);
-    }
-    
-    async create(data: AdminHotels): Promise<AdminHotels> {
-        const user = await this.usersRepository.findOne({
-            where: { id: data.user.id },
-        })
-        if (!user) throw new NotFoundException('User not found');
-        
-        const hotel = await this.hotelsRepository.findOne({
-            where: { id: data.hotel.id },
-        })
-        if (!hotel) throw new NotFoundException('Hotel not found');
-        
-        const newAdminHotels = await this.adminHotelsRepository.save(data);
-        return newAdminHotels;
-    }
+  async findAdminsByHotel(hotelId: number): Promise<User[]> {
+    const relations = await this.adminHotelsRepository.find({
+      where: { hotel: { id: hotelId } },
+      relations: ['user'],
+    });
+    return relations.map((relation) => relation.user);
+  }
 
-    async delete(id: number): Promise<string> {
-        const result = await this.adminHotelsRepository.delete(id);
-        if (result.affected === 0) throw new Error('Admin hotel not found');
-        return 'Admin hotel deleted successfully';
-    }
+  async create(data: AdminHotels): Promise<AdminHotels> {
+    const user = await this.usersRepository.findOne({
+      where: { id: data.user.id },
+    });
+    if (!user) throw new NotFoundException('User not found');
+
+    const hotel = await this.hotelsRepository.findOne({
+      where: { id: data.hotel.id },
+    });
+    if (!hotel) throw new NotFoundException('Hotel not found');
+
+    const newAdminHotels = await this.adminHotelsRepository.save(data);
+    return newAdminHotels;
+  }
+
+  async delete(id: number): Promise<string> {
+    const result = await this.adminHotelsRepository.delete(id);
+    if (result.affected === 0) throw new Error('Admin hotel not found');
+    return 'Admin hotel deleted successfully';
+  }
 }

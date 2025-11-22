@@ -7,7 +7,10 @@ export class AuthController {
 
   @Post('login/client')
   async loginClient(@Body() body: { email: string; password: string }) {
-    const client = await this.authService.validateClient(body.email, body.password);
+    const client = await this.authService.validateClient(
+      body.email,
+      body.password,
+    );
     return this.authService.login('client', client);
   }
 
@@ -18,7 +21,10 @@ export class AuthController {
   }
 
   @Post('login-super-admin')
-  async loginSuperAdmin(@Body('email') email: string, @Body('password') password: string) {
+  async loginSuperAdmin(
+    @Body('email') email: string,
+    @Body('password') password: string,
+  ) {
     return this.authService.loginSuperAdmin(email, password);
   }
 }

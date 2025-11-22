@@ -14,7 +14,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     @InjectRepository(super_admin)
-    private superAdminRepository: Repository<super_admin>
+    private superAdminRepository: Repository<super_admin>,
   ) {}
 
   async validateClient(email: string, password: string): Promise<any> {
@@ -36,8 +36,12 @@ export class AuthService {
   }
 
   async login(entity: 'client' | 'user', payload: any) {
-    const tokenPayload: any = { sub: payload.id, email: payload.email, role: entity };
-    
+    const tokenPayload: any = {
+      sub: payload.id,
+      email: payload.email,
+      role: entity,
+    };
+
     if (entity === 'user') {
       tokenPayload.has_premium_service = payload.has_premium_service;
       tokenPayload.has_vip_service = payload.has_vip_service;
@@ -49,13 +53,18 @@ export class AuthService {
       email: payload.email,
       ...(entity === 'user' && {
         has_premium_service: payload.has_premium_service,
-        has_vip_service: payload.has_vip_service
-      })
+        has_vip_service: payload.has_vip_service,
+      }),
     };
   }
 
-  async loginSuperAdmin(email: string, password: string): Promise<{ accessToken: string }> {
-    const superAdmin = await this.superAdminRepository.findOne({ where: { email } });
+  async loginSuperAdmin(
+    email: string,
+    password: string,
+  ): Promise<{ accessToken: string }> {
+    const superAdmin = await this.superAdminRepository.findOne({
+      where: { email },
+    });
     if (!superAdmin) {
       throw new UnauthorizedException('Invalid credentials');
     }
