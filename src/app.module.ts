@@ -26,10 +26,12 @@ import { PaymentController } from './Controllers/payment/payment.controller';
 import { Payment } from './Models/payment_services.models';
 import { AuthModule } from './auth/auth.module';
 import { HttpModule } from '@nestjs/axios';
+import { ChatController } from './Controllers/chatbot/chat.controller';
 
 import { super_admin } from './Models/super_admin.models';
 import { SuperAdminService } from './Services/super_admin/super_admin.service';
 import { SuperAdminController } from './Controllers/super_admin/super_admin.controller';
+import { ChatService } from './Services/chatbot/chat.service';
 
 @Module({
   imports: [
@@ -67,6 +69,7 @@ import { SuperAdminController } from './Controllers/super_admin/super_admin.cont
     BookingController,
     PaymentController,
     SuperAdminController,
+    ChatController,
   ],
   providers: [
     UsersService,
@@ -78,6 +81,7 @@ import { SuperAdminController } from './Controllers/super_admin/super_admin.cont
     PaymentBookingService,
     PaymentService,
     SuperAdminService,
+    ChatService,
   ],
 })
 export class AppModule {}
