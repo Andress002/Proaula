@@ -2,12 +2,23 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  app.setGlobalPrefix('api')
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true
+    })
+  )
+
   app.enableCors({
-    origin: 'http://localhost:4200',
+    origin: '*',
     methods: 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
     credentials: true,
   });
@@ -16,7 +27,7 @@ async function bootstrap() {
     prefix: '/uploads/',
   });
 
-  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
+  await app.listen(3000);
 }
 
 bootstrap();

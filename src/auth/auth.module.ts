@@ -3,16 +3,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { ClientsService } from '../Services/clients/clients.service';
-import { UsersService } from '../Services/users/users.service';
 import { JwtStrategy } from './auth.strategy';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Client } from '../Models/clients.models';
-import { User } from '../Models/users.models';
-import { AdminHotels } from '../Models/admins_hotels.models';
-import { Hotel } from '../Models/hotels.models';
-import { AdminHotelsService } from '../Services/admin-hotels/admin-hotels.service';
-import { super_admin } from 'src/Models/super_admin.models';
+import { UsersModule } from '../users/users.module';
+import { ClientsModule } from '../clients/clients.module';
+import { SuperAdminModule } from '../super-admin/super-admin.module';
 
 @Module({
   imports: [
@@ -21,9 +15,11 @@ import { super_admin } from 'src/Models/super_admin.models';
       secret: 'yourSecretKey',
       signOptions: { expiresIn: '1h' },
     }),
-    TypeOrmModule.forFeature([Client, User, AdminHotels, Hotel, super_admin]),
+    UsersModule,
+    ClientsModule,
+    SuperAdminModule,
   ],
-  providers: [AuthService, JwtStrategy, ClientsService, UsersService, AdminHotelsService],
+  providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
   exports: [JwtModule],
 })
