@@ -52,9 +52,9 @@ export class SeedService {
   ) {}
 
   async executeSeed() {
-    this.logger.log(' Iniciando proceso de seed...');
+    this.logger.log(' Iniciando proceso de seed');
 
-    // Eliminar datos en orden inverso de dependencias
+    
     await this.deleteTables();
 
     // Insertar datos en orden de dependencias
@@ -91,7 +91,7 @@ export class SeedService {
   }
 
   private async deleteTables() {
-    this.logger.log('  Eliminando datos existentes...');
+    this.logger.log('Eliminando datos existentes');
 
     // Orden inverso de dependencias para evitar errores de FK
     await this.paymentReservationRepository.createQueryBuilder().delete().execute();
@@ -104,7 +104,7 @@ export class SeedService {
     await this.userRepository.createQueryBuilder().delete().execute();
     await this.superAdminRepository.createQueryBuilder().delete().execute();
 
-    this.logger.log('  Datos eliminados correctamente');
+    this.logger.log('Datos eliminados correctamente');
   }
 
   private async seedSuperAdmins(): Promise<super_admin[]> {
