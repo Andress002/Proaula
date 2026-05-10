@@ -11,6 +11,7 @@ import { PaymentModule } from './payment/payment.module';
 import { SuperAdminModule } from './super-admin/super-admin.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { AuthModule } from './auth/auth.module';
+import { SeedModule } from './seed/seed.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SeedModule } from './seed/seed.module';
 

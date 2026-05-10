@@ -1,8 +1,12 @@
 export const hotelsSeed = [
   {
     name: 'Hotel Dorado Plaza',
+<<<<<<< HEAD
     description:
       'Lujoso hotel de 5 estrellas ubicado en el corazón de Bogotá, con vistas panorámicas a los cerros orientales.',
+=======
+    description: 'Lujoso hotel de 5 estrellas ubicado en el corazón de Bogotá, con vistas panorámicas a los cerros orientales.',
+>>>>>>> 046a1cec0f433a023ac5f349412bad05ccb64013
     type_accomodation: 'hotel',
     country: 'Colombia',
     city: 'Bogotá',
@@ -12,8 +16,12 @@ export const hotelsSeed = [
   },
   {
     name: 'Hostel La Candelaria',
+<<<<<<< HEAD
     description:
       'Acogedor hostal en el barrio histórico de La Candelaria, ideal para viajeros y mochileros.',
+=======
+    description: 'Acogedor hostal en el barrio histórico de La Candelaria, ideal para viajeros y mochileros.',
+>>>>>>> 046a1cec0f433a023ac5f349412bad05ccb64013
     type_accomodation: 'hostel',
     country: 'Colombia',
     city: 'Bogotá',
@@ -23,8 +31,12 @@ export const hotelsSeed = [
   },
   {
     name: 'Medellín Grand Hotel',
+<<<<<<< HEAD
     description:
       'Hotel moderno en El Poblado con piscina infinity, spa y restaurante gourmet.',
+=======
+    description: 'Hotel moderno en El Poblado con piscina infinity, spa y restaurante gourmet.',
+>>>>>>> 046a1cec0f433a023ac5f349412bad05ccb64013
     type_accomodation: 'hotel',
     country: 'Colombia',
     city: 'Medellín',
@@ -34,8 +46,12 @@ export const hotelsSeed = [
   },
   {
     name: 'Airbnb Villa del Mar',
+<<<<<<< HEAD
     description:
       'Hermosa villa frente al mar en Cartagena con 4 habitaciones, cocina equipada y jardín tropical.',
+=======
+    description: 'Hermosa villa frente al mar en Cartagena con 4 habitaciones, cocina equipada y jardín tropical.',
+>>>>>>> 046a1cec0f433a023ac5f349412bad05ccb64013
     type_accomodation: 'airbnb',
     country: 'Colombia',
     city: 'Cartagena',
@@ -45,8 +61,12 @@ export const hotelsSeed = [
   },
   {
     name: 'Motel Las Palmas',
+<<<<<<< HEAD
     description:
       'Cómodo motel de carretera con todas las comodidades para el viajero, ubicado en la vía Cali-Palmira.',
+=======
+    description: 'Cómodo motel de carretera con todas las comodidades para el viajero, ubicado en la vía Cali-Palmira.',
+>>>>>>> 046a1cec0f433a023ac5f349412bad05ccb64013
     type_accomodation: 'motel',
     country: 'Colombia',
     city: 'Cali',
@@ -56,8 +76,12 @@ export const hotelsSeed = [
   },
   {
     name: 'Hotel Santa Cruz',
+<<<<<<< HEAD
     description:
       'Elegante hotel boutique en el centro histórico de Santa Marta con terraza al mar.',
+=======
+    description: 'Elegante hotel boutique en el centro histórico de Santa Marta con terraza al mar.',
+>>>>>>> 046a1cec0f433a023ac5f349412bad05ccb64013
     type_accomodation: 'hotel',
     country: 'Colombia',
     city: 'Santa Marta',

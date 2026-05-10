@@ -54,6 +54,10 @@ export class SeedService {
   async executeSeed() {
     this.logger.log(' Iniciando proceso de seed');
 
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 046a1cec0f433a023ac5f349412bad05ccb64013
     await this.deleteTables();
 
     // Insertar datos en orden de dependencias
@@ -93,10 +97,14 @@ export class SeedService {
     this.logger.log('Eliminando datos existentes');
 
     // Orden inverso de dependencias para evitar errores de FK
+<<<<<<< HEAD
     await this.paymentReservationRepository
       .createQueryBuilder()
       .delete()
       .execute();
+=======
+    await this.paymentReservationRepository.createQueryBuilder().delete().execute();
+>>>>>>> 046a1cec0f433a023ac5f349412bad05ccb64013
     await this.paymentRepository.createQueryBuilder().delete().execute();
     await this.reservationRepository.createQueryBuilder().delete().execute();
     await this.adminHotelsRepository.createQueryBuilder().delete().execute();
@@ -210,7 +218,13 @@ export class SeedService {
       );
     }
 
+<<<<<<< HEAD
     this.logger.log(` ${createdAdminHotels.length} admin-hotels creados`);
+=======
+    this.logger.log(
+      ` ${createdAdminHotels.length} admin-hotels creados`,
+    );
+>>>>>>> 046a1cec0f433a023ac5f349412bad05ccb64013
     return createdAdminHotels;
   }
 
@@ -235,7 +249,13 @@ export class SeedService {
       );
     }
 
+<<<<<<< HEAD
     this.logger.log(` ${createdReservations.length} reservaciones creadas`);
+=======
+    this.logger.log(
+      ` ${createdReservations.length} reservaciones creadas`,
+    );
+>>>>>>> 046a1cec0f433a023ac5f349412bad05ccb64013
     return createdReservations;
   }
 
