@@ -12,10 +12,11 @@ import { SuperAdminModule } from './super-admin/super-admin.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({isGlobal: true}),
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -28,7 +29,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         database: configService.get<string>('DB_DATABASE'),
         autoLoadEntities: true,
         synchronize: true,
-      })
+      }),
     }),
     UsersModule,
     ClientsModule,
@@ -41,6 +42,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     SuperAdminModule,
     ChatbotModule,
     AuthModule,
+    SeedModule,
   ],
 })
 export class AppModule {}

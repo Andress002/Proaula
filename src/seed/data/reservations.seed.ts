@@ -1,0 +1,73 @@
+// roomIndex -> index in roomsSeed, clientIndex -> index in clientsSeed
+export const reservationsSeed = [
+  {
+    roomIndex: 0,
+    clientIndex: 0,
+    status: 'confirmed',
+    check_in: '2026-05-01',
+    check_out: '2026-05-05',
+  },
+  {
+    roomIndex: 1,
+    clientIndex: 1,
+    status: 'confirmed',
+    check_in: '2026-05-10',
+    check_out: '2026-05-14',
+  },
+  {
+    roomIndex: 5,
+    clientIndex: 2,
+    status: 'confirmed',
+    check_in: '2026-04-20',
+    check_out: '2026-04-25',
+  },
+  {
+    roomIndex: 6,
+    clientIndex: 3,
+    status: 'canceled',
+    check_in: '2026-04-18',
+    check_out: '2026-04-22',
+  },
+  {
+    roomIndex: 8,
+    clientIndex: 4,
+    status: 'confirmed',
+    check_in: '2026-06-01',
+    check_out: '2026-06-07',
+  },
+  {
+    roomIndex: 9,
+    clientIndex: 5,
+    status: 'confirmed',
+    check_in: '2026-04-15',
+    check_out: '2026-04-20',
+  },
+  {
+    roomIndex: 11,
+    clientIndex: 6,
+    status: 'confirmed',
+    check_in: '2026-05-20',
+    check_out: '2026-05-27',
+  },
+  {
+    roomIndex: 3,
+    clientIndex: 7,
+    status: 'refunded',
+    check_in: '2026-04-10',
+    check_out: '2026-04-12',
+  },
+  {
+    roomIndex: 2,
+    clientIndex: 0,
+    status: 'confirmed',
+    check_in: '2026-07-01',
+    check_out: '2026-07-04',
+  },
+  {
+    roomIndex: 7,
+    clientIndex: 1,
+    status: 'confirmed',
+    check_in: '2026-06-15',
+    check_out: '2026-06-20',
+  },
+];
