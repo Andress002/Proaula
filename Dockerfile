@@ -6,13 +6,13 @@ WORKDIR /usr/src/app
 # Copiar archivos de dependencias
 COPY package*.json ./
 
-# Instalar dependencias (incluyendo las de desarrollo para Nest)
+# Instalar dependencias y tambien incluyendo las de desarrollo para Nest
 RUN npm ci
 
-# Copiar el resto del código
+# Se copia todo el resto del código
 COPY . .
 
-# Exponer el puerto por defecto de NestJS
+# E l puerto por defecto donde esta corriendo el backend de nest
 EXPOSE 3000
 
 # Comando para desarrollo
