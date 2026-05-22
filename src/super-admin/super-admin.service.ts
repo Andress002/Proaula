@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { super_admin } from './entities/super-admin.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { CreateSuperAdminDto } from 'src/dto/super-admin.dto';
 
 @Injectable()
 export class SuperAdminService {
@@ -17,7 +18,9 @@ export class SuperAdminService {
     return superAdmin;
   }
 
-  async createSuperAdmin(data: super_admin): Promise<super_admin> {
+  async createSuperAdmin(
+    data: CreateSuperAdminDto,
+  ): Promise<CreateSuperAdminDto> {
     const salt = await bcrypt.genSalt();
     data.password = await bcrypt.hash(data.password, salt);
     const newSuperAdmin = this.superA.create(data);

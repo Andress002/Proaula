@@ -8,22 +8,36 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - ./postgres:/var/lib/postgresql/data
+      - mi_postgres_data:/var/lib/postgresql/data
 
   backend:
+    build: .
     image: andress002/nestjs-backend:latest
     ports:
       - '3000:3000'
     depends_on:
       - db
+      - prediction
     environment:
       DB_HOST: db
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
+      PREDICTION_URL: http://prediction:8080
 
   frontend:
+    build: ../NuevoProAula
     image: andress002/angular-frontend:latest
     ports:
       - '4200:80'
     depends_on:
       - backend
+
+  prediction:
+    build: ./src/prediction-service
+    image: andress002/prediction-service:latest
+    ports:
+      - '8080:8080'
+    restart: always
+
+volumes:
+  mi_postgres_data:

@@ -9,7 +9,8 @@ import { lastValueFrom } from 'rxjs';
 import { Client } from '../clients/entities/client.entity';
 import { Reservation } from './entities/reservation.entity';
 import { Room } from '../rooms/entities/room.entity';
-import { Between, DataSource, Not, Repository } from 'typeorm';
+import { CreateReservationDto, UpdateReservationDto } from '../dto/booking.dto';
+import { LessThan, MoreThan, DataSource, Not, Repository } from 'typeorm';
 
 @Injectable()
 export class BookingService {
@@ -105,13 +106,13 @@ export class BookingService {
     return reservations;
   }
 
-  async create(data: Reservation): Promise<Reservation> {
+  async create(data: CreateReservationDto): Promise<Reservation> {
     const [room, client] = await Promise.all([
       this.roomsRepository.findOne({
-        where: { id: data.room.id },
+        where: { id: data.roomId },
         relations: ['hotel'],
       }),
-      this.clientRepository.findOne({ where: { id: data.client.id } }),
+      this.clientRepository.findOne({ where: { id: data.clientId } }),
     ]);
 
     if (!room) throw new NotFoundException('Room not found');
@@ -121,9 +122,9 @@ export class BookingService {
 
     const existBooking = await this.reservationRepository.findOne({
       where: {
-        room: { id: data.room.id },
-        check_in: Between(data.check_in, data.check_out),
-        check_out: Between(data.check_in, data.check_out),
+        room: { id: data.roomId },
+        check_in: LessThan(new Date(data.check_out)),
+        check_out: MoreThan(new Date(data.check_in)),
         status: Not('canceled'),
       },
     });
@@ -131,7 +132,9 @@ export class BookingService {
     if (existBooking) throw new ConflictException('Reservation already exists');
 
     const reservation = this.reservationRepository.create({
-      ...data,
+      status: data.status,
+      check_in: data.check_in,
+      check_out: data.check_out,
       room,
       client,
     });
@@ -139,26 +142,28 @@ export class BookingService {
     return await this.reservationRepository.save(reservation);
   }
 
-  async update(id: number, data: Partial<Reservation>): Promise<Reservation> {
+  async update(id: number, data: UpdateReservationDto): Promise<Reservation> {
     const reservation = await this.reservationRepository.preload({
       id,
-      ...data,
+      status: data.status,
+      check_in: data.check_in,
+      check_out: data.check_out,
     });
 
     if (!reservation) throw new NotFoundException('Reservation not found');
 
-    if (data.room?.id) {
+    if (data.roomId) {
       const room = await this.roomsRepository.findOne({
-        where: { id: data.room.id },
+        where: { id: data.roomId },
         relations: ['hotel'],
       });
       if (!room) throw new NotFoundException('Room not found');
       reservation.room = room;
     }
 
-    if (data.client?.id) {
+    if (data.clientId) {
       const client = await this.clientRepository.findOne({
-        where: { id: data.client.id },
+        where: { id: data.clientId },
       });
       if (!client) throw new NotFoundException('Client not found');
       reservation.client = client;
@@ -175,8 +180,8 @@ export class BookingService {
         where: {
           id: Not(id),
           room: { id: reservation.room.id },
-          check_in: Between(checkIn, checkOut),
-          check_out: Between(checkIn, checkOut),
+          check_in: LessThan(new Date(checkOut)),
+          check_out: MoreThan(new Date(checkIn)),
           status: Not('canceled'),
         },
       });

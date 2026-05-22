@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { BookingService } from './booking.service';
-import { Reservation } from './entities/reservation.entity';
+import { CreateReservationDto, UpdateReservationDto } from '../dto/booking.dto';
 
 @Controller('booking')
 export class BookingController {
@@ -65,13 +65,13 @@ export class BookingController {
   }
 
   @Post()
-  async create(@Body() data: Reservation) {
-    return await this.bookingService.create(data);
+  async create(@Body() data: CreateReservationDto) {
+    return await this.bookingService.create(data as any);
   }
 
   @Patch(':id')
-  async update(@Param('id') id: number, @Body() data: Partial<Reservation>) {
-    return await this.bookingService.update(id, data);
+  async update(@Param('id') id: number, @Body() data: UpdateReservationDto) {
+    return await this.bookingService.update(id, data as any);
   }
 
   @Delete(':id')

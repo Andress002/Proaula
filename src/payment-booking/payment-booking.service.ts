@@ -5,6 +5,7 @@ import { PaymentReservation } from './entities/payment-reservation.entity';
 import { Reservation } from '../booking/entities/reservation.entity';
 import { Room } from '../rooms/entities/room.entity';
 import { DataSource, Repository } from 'typeorm';
+import { CreatePaymentReservationDto } from '../dto/payment-booking.dto';
 
 @Injectable()
 export class PaymentBookingService {
@@ -109,21 +110,29 @@ export class PaymentBookingService {
     return payment;
   }
 
-  async create(data: PaymentReservation): Promise<PaymentReservation> {
+  async create(data: CreatePaymentReservationDto): Promise<PaymentReservation> {
     const result = await this.datasource.transaction(async (manager) => {
-      const [client, reservation, room] = await Promise.all([
-        this.clientRepository.findOne({ where: { id: data.client.id } }),
-        this.reservationRepository.findOne({
-          where: { id: data.reservation.id },
-        }),
-        this.roomRepository.findOne({ where: { id: data.room.id } }),
-      ]);
-      if (!client) throw new NotFoundException('Client not found');
+      const reservation = await this.reservationRepository.findOne({
+        where: { id: data.reservationId },
+        relations: ['room', 'client'],
+      });
+
       if (!reservation) throw new NotFoundException('Reservation not found');
+
+      const client = data.clientId 
+        ? await this.clientRepository.findOne({ where: { id: data.clientId } })
+        : reservation.client;
+
+      const room = data.roomId
+        ? await this.roomRepository.findOne({ where: { id: data.roomId } })
+        : reservation.room;
+      if (!client) throw new NotFoundException('Client not found');
       if (!room) throw new NotFoundException('Room not found');
 
       const payment = manager.create(PaymentReservation, {
-        ...data,
+        amount: data.amount,
+        payment_method: data.payment_method,
+        status: data.status || 'pending',
         client: client,
         reservation: reservation,
         room: room,

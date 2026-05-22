@@ -13,7 +13,7 @@ import { ChatbotModule } from './chatbot/chatbot.module';
 import { AuthModule } from './auth/auth.module';
 import { SeedModule } from './seed/seed.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { SeedModule } from './seed/seed.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -44,6 +44,7 @@ import { SeedModule } from './seed/seed.module';
     ChatbotModule,
     AuthModule,
     SeedModule,
+    DashboardModule,
   ],
 })
 export class AppModule {}

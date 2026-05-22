@@ -9,6 +9,7 @@ import {
 import { Hotel } from '../../hotels/entities/hotel.entity';
 import { Reservation } from '../../booking/entities/reservation.entity';
 import { PaymentReservation } from '../../payment-booking/entities/payment-reservation.entity';
+import { RoomStatus } from 'src/enums/rooms.enum';
 
 @Entity()
 export class Room {
@@ -18,18 +19,20 @@ export class Room {
   name: string;
   @Column()
   description: string;
-  @Column()
+  @Column('decimal')
   price: number;
   @Column({
     type: 'enum',
-    enum: ['free', 'busy', 'booked'],
-    default: 'free',
+    enum: RoomStatus,
+    default: RoomStatus.FREE,
   })
   status: string;
   @Column()
   ability: string;
   @Column({ nullable: true })
   image: string;
+  @Column({ default: true })
+  available: boolean;
 
   @ManyToOne(() => Hotel, (hotel) => hotel.rooms)
   @JoinColumn({ name: 'hotel_id' })

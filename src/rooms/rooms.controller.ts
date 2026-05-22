@@ -15,6 +15,7 @@ import * as fs from 'fs';
 import { diskStorage } from 'multer';
 import { Room } from './entities/room.entity';
 import { RoomsService } from './rooms.service';
+import { CreateRoomDto } from 'src/dto/createRoom.dto';
 
 @Controller('rooms')
 export class RoomsController {
@@ -79,7 +80,10 @@ export class RoomsController {
       }),
     }),
   )
-  async create(@Body() data: Room, @UploadedFile() file: Express.Multer.File) {
+  async create(
+    @Body() data: CreateRoomDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
     return await this.roomsService.create(data, file);
   }
 

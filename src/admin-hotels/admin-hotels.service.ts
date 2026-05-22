@@ -42,19 +42,19 @@ export class AdminHotelsService {
     return relations.map((relation) => relation.user);
   }
 
-  async create(data: AdminHotels): Promise<AdminHotels> {
+  async create(userId: number, hotelId: number): Promise<AdminHotels> {
     const user = await this.usersRepository.findOne({
-      where: { id: data.user.id },
+      where: { id: userId },
     });
     if (!user) throw new NotFoundException('User not found');
 
     const hotel = await this.hotelsRepository.findOne({
-      where: { id: data.hotel.id },
+      where: { id: hotelId },
     });
     if (!hotel) throw new NotFoundException('Hotel not found');
 
-    const newAdminHotels = await this.adminHotelsRepository.save(data);
-    return newAdminHotels;
+    const newAdminHotels = this.adminHotelsRepository.create({ user, hotel });
+    return await this.adminHotelsRepository.save(newAdminHotels);
   }
 
   async delete(id: number): Promise<string> {

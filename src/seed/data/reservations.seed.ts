@@ -1,5 +1,6 @@
 // roomIndex -> index in roomsSeed, clientIndex -> index in clientsSeed
 export const reservationsSeed = [
+  // Reservas existentes (hoteles originales)
   {
     roomIndex: 0,
     clientIndex: 0,
@@ -69,5 +70,62 @@ export const reservationsSeed = [
     status: 'confirmed',
     check_in: '2026-06-15',
     check_out: '2026-06-20',
+  },
+  // Nuevas reservas para hoteles nuevos (índices 12-24)
+  {
+    roomIndex: 13,
+    clientIndex: 2,
+    status: 'confirmed',
+    check_in: '2026-05-05',
+    check_out: '2026-05-10',
+  },
+  {
+    roomIndex: 14,
+    clientIndex: 3,
+    status: 'confirmed',
+    check_in: '2026-06-01',
+    check_out: '2026-06-05',
+  },
+  {
+    roomIndex: 15,
+    clientIndex: 4,
+    status: 'confirmed',
+    check_in: '2026-05-15',
+    check_out: '2026-05-20',
+  },
+  {
+    roomIndex: 17,
+    clientIndex: 5,
+    status: 'canceled',
+    check_in: '2026-04-25',
+    check_out: '2026-04-28',
+  },
+  {
+    roomIndex: 19,
+    clientIndex: 6,
+    status: 'confirmed',
+    check_in: '2026-06-10',
+    check_out: '2026-06-15',
+  },
+  {
+    roomIndex: 20,
+    clientIndex: 7,
+    status: 'refunded',
+    check_in: '2026-05-01',
+    check_out: '2026-05-03',
+  },
+  {
+    roomIndex: 22,
+    clientIndex: 0,
+    status: 'confirmed',
+    check_in: '2026-07-10',
+    check_out: '2026-07-15',
+  },
+  {
+    roomIndex: 24,
+    clientIndex: 1,
+    status: 'confirmed',
+    check_in: '2026-06-20',
+    check_out: '2026-06-25',
   },
 ];

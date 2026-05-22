@@ -7,34 +7,34 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
+import { CreateUserDto, UpdateUserDto } from '../dto/users.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Get('all')
-  async findAll(): Promise<User[]> {
+  async findAll() {
     return await this.usersService.findAll();
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<User> {
+  async findOne(@Param('id') id: number) {
     return await this.usersService.findOne(id);
   }
 
   @Post('create')
-  async create(@Body() newUser: User): Promise<User> {
-    return await this.usersService.create(newUser);
+  async create(@Body() newUser: CreateUserDto) {
+    return await this.usersService.create(newUser as any);
   }
 
   @Patch(':id')
   async update(
     @Param('id') id: number,
-    @Body() dataUser: Partial<User>,
-  ): Promise<User> {
-    return await this.usersService.update(id, dataUser);
+    @Body() dataUser: UpdateUserDto,
+  ) {
+    return await this.usersService.update(id, dataUser as any);
   }
 
   @Delete(':id')

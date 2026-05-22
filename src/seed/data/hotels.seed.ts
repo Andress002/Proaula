@@ -1,12 +1,8 @@
 export const hotelsSeed = [
   {
     name: 'Hotel Dorado Plaza',
-<<<<<<< HEAD
     description:
       'Lujoso hotel de 5 estrellas ubicado en el corazón de Bogotá, con vistas panorámicas a los cerros orientales.',
-=======
-    description: 'Lujoso hotel de 5 estrellas ubicado en el corazón de Bogotá, con vistas panorámicas a los cerros orientales.',
->>>>>>> 046a1cec0f433a023ac5f349412bad05ccb64013
     type_accomodation: 'hotel',
     country: 'Colombia',
     city: 'Bogotá',
@@ -16,12 +12,8 @@ export const hotelsSeed = [
   },
   {
     name: 'Hostel La Candelaria',
-<<<<<<< HEAD
     description:
       'Acogedor hostal en el barrio histórico de La Candelaria, ideal para viajeros y mochileros.',
-=======
-    description: 'Acogedor hostal en el barrio histórico de La Candelaria, ideal para viajeros y mochileros.',
->>>>>>> 046a1cec0f433a023ac5f349412bad05ccb64013
     type_accomodation: 'hostel',
     country: 'Colombia',
     city: 'Bogotá',
@@ -31,12 +23,8 @@ export const hotelsSeed = [
   },
   {
     name: 'Medellín Grand Hotel',
-<<<<<<< HEAD
     description:
       'Hotel moderno en El Poblado con piscina infinity, spa y restaurante gourmet.',
-=======
-    description: 'Hotel moderno en El Poblado con piscina infinity, spa y restaurante gourmet.',
->>>>>>> 046a1cec0f433a023ac5f349412bad05ccb64013
     type_accomodation: 'hotel',
     country: 'Colombia',
     city: 'Medellín',
@@ -46,12 +34,8 @@ export const hotelsSeed = [
   },
   {
     name: 'Airbnb Villa del Mar',
-<<<<<<< HEAD
     description:
       'Hermosa villa frente al mar en Cartagena con 4 habitaciones, cocina equipada y jardín tropical.',
-=======
-    description: 'Hermosa villa frente al mar en Cartagena con 4 habitaciones, cocina equipada y jardín tropical.',
->>>>>>> 046a1cec0f433a023ac5f349412bad05ccb64013
     type_accomodation: 'airbnb',
     country: 'Colombia',
     city: 'Cartagena',
@@ -61,12 +45,8 @@ export const hotelsSeed = [
   },
   {
     name: 'Motel Las Palmas',
-<<<<<<< HEAD
     description:
       'Cómodo motel de carretera con todas las comodidades para el viajero, ubicado en la vía Cali-Palmira.',
-=======
-    description: 'Cómodo motel de carretera con todas las comodidades para el viajero, ubicado en la vía Cali-Palmira.',
->>>>>>> 046a1cec0f433a023ac5f349412bad05ccb64013
     type_accomodation: 'motel',
     country: 'Colombia',
     city: 'Cali',
@@ -76,17 +56,57 @@ export const hotelsSeed = [
   },
   {
     name: 'Hotel Santa Cruz',
-<<<<<<< HEAD
     description:
       'Elegante hotel boutique en el centro histórico de Santa Marta con terraza al mar.',
-=======
-    description: 'Elegante hotel boutique en el centro histórico de Santa Marta con terraza al mar.',
->>>>>>> 046a1cec0f433a023ac5f349412bad05ccb64013
     type_accomodation: 'hotel',
     country: 'Colombia',
     city: 'Santa Marta',
     address: 'Calle 18 #3-15, Centro Histórico',
     phone: '6057891234',
     email: 'info@hotelsantacruz.com',
+  },
+  {
+    name: 'Hotel Valle Verde',
+    description:
+      'Hotel campestre en el Valle del Cauca con piscina al aire libre y áreas verdes.',
+    type_accomodation: 'hotel',
+    country: 'Colombia',
+    city: 'Pereira',
+    address: 'Km 8 Vía Pereira - Armenia',
+    phone: '6061234567',
+    email: 'reservas@hotelvalleverde.com',
+  },
+  {
+    name: 'Posada Colonial Casa Blanca',
+    description:
+      'Casa colonial restaurada en el centro de Barichara, Santander.',
+    type_accomodation: 'hostel',
+    country: 'Colombia',
+    city: 'Barichara',
+    address: 'Calle 5 #4-25',
+    phone: '6079876543',
+    email: 'info@posadacolonial.com',
+  },
+  {
+    name: 'Hotel Playa Mar',
+    description:
+      'Hotel frente a la playa en San Andrés con vista al mar Caribe.',
+    type_accomodation: 'hotel',
+    country: 'Colombia',
+    city: 'San Andrés',
+    address: 'Av. Colon #3-45',
+    phone: '6081234567',
+    email: 'reservas@hotelplayamar.com',
+  },
+  {
+    name: 'Eco Lodge Montaña',
+    description:
+      'Ecolodge en las montañas de Antioquia con senderos y naturaleza.',
+    type_accomodation: 'hostel',
+    country: 'Colombia',
+    city: 'Jardín',
+    address: 'Vereda La Argentina',
+    phone: '6049876543',
+    email: 'info@ecolodemontana.com',
   },
 ];

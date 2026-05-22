@@ -7,8 +7,8 @@ import {
   ParseIntPipe,
   Post,
 } from '@nestjs/common';
-import { AdminHotels } from './entities/admin-hotels.entity';
 import { AdminHotelsService } from './admin-hotels.service';
+import { CreateAdminHotelsDto } from '../dto/admin-hotels.dto';
 
 @Controller('admin-hotels')
 export class AdminHotelsController {
@@ -30,8 +30,8 @@ export class AdminHotelsController {
   }
 
   @Post('create')
-  async create(@Body() data: AdminHotels) {
-    return await this.adminHotelsService.create(data);
+  async create(@Body() data: CreateAdminHotelsDto) {
+    return await this.adminHotelsService.create(data.userId, data.hotelId);
   }
 
   @Delete(':id')

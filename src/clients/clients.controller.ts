@@ -21,16 +21,6 @@ export class ClientsController {
     return await this.clientsService.findAll();
   }
 
-  @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    return await this.clientsService.findOne(id);
-  }
-
-  @Get(':id/reservations')
-  async findReservations(@Param('id', ParseIntPipe) id: number) {
-    return await this.clientsService.findReservations(id);
-  }
-
   @Get('by-admin/:adminId')
   async findByAdmin(@Param('adminId', ParseIntPipe) adminId: number) {
     return await this.clientsService.findClientsByAdmin(adminId);
@@ -44,6 +34,16 @@ export class ClientsController {
   @Get('by-email/:email')
   async findOneByEmail(@Param('email') email: string) {
     return await this.clientsService.findOneByEmail(email);
+  }
+
+  @Get(':id/reservations')
+  async findReservations(@Param('id', ParseIntPipe) id: number) {
+    return await this.clientsService.findReservations(id);
+  }
+
+  @Get(':id')
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return await this.clientsService.findOne(id);
   }
 
   @Post('create')

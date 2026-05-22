@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { PaymentBookingService } from './payment-booking.service';
-import { PaymentReservation } from './entities/payment-reservation.entity';
+import { CreatePaymentReservationDto } from '../dto/payment-booking.dto';
 
 @Controller('payment-booking')
 export class PaymentBookingController {
@@ -58,8 +58,8 @@ export class PaymentBookingController {
   }
 
   @Post()
-  async create(@Body() data: PaymentReservation) {
-    return await this.paymentBookingService.create(data);
+  async create(@Body() data: CreatePaymentReservationDto) {
+    return await this.paymentBookingService.create(data as any);
   }
 
   @Patch('refund/:id')

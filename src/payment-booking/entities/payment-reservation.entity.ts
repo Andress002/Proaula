@@ -1,9 +1,11 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Reservation } from '../../booking/entities/reservation.entity';
 import { Client } from '../../clients/entities/client.entity';
@@ -50,9 +52,9 @@ export class PaymentReservation {
   @JoinColumn({ name: 'room_id' })
   room: Room;
 
-  @Column()
+  @CreateDateColumn()
   created_at: Date;
 
-  @Column()
+  @UpdateDateColumn()
   updated_at: Date;
 }

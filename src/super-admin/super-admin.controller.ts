@@ -1,18 +1,18 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { super_admin } from './entities/super-admin.entity';
 import { SuperAdminService } from './super-admin.service';
+import { CreateSuperAdminDto } from '../dto/super-admin.dto';
 
 @Controller('super-admin')
 export class SuperAdminController {
   constructor(private readonly superAdminService: SuperAdminService) {}
 
   @Post('create')
-  async create(@Body() data: super_admin): Promise<super_admin> {
-    return this.superAdminService.createSuperAdmin(data);
+  async create(@Body() data: CreateSuperAdminDto) {
+    return this.superAdminService.createSuperAdmin(data as any);
   }
 
   @Get(':id')
-  async findById(@Param('id') id: number): Promise<super_admin> {
+  async findById(@Param('id') id: number) {
     return this.superAdminService.findAllsuperAdminById(id);
   }
 }

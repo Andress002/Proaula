@@ -6,6 +6,8 @@ import { AdminHotels } from '../admin-hotels/entities/admin-hotels.entity';
 import { Hotel } from '../hotels/entities/hotel.entity';
 import { Room } from './entities/room.entity';
 import { Repository } from 'typeorm';
+import { RoomsDto } from 'src/dto/rooms.dto';
+import { CreateRoomDto } from 'src/dto/createRoom.dto';
 
 @Injectable()
 export class RoomsService {
@@ -29,11 +31,11 @@ export class RoomsService {
   async findRoomsByHotel(hotelId: number): Promise<Room[]> {
     const rooms = await this.roomsRepository.find({
       where: { hotel: { id: hotelId } },
-      relations: ['hotel', 'reservation'],
+      relations: ['hotel', 'reservation', 'reservation.client'],
     });
 
     if (rooms.length === 0)
-      throw new NotFoundException('No rooms found for this hotel');
+      return [];
 
     return rooms.map((room) => {
       if (room.image) {
@@ -102,7 +104,17 @@ export class RoomsService {
     const rooms = adminHotels.flatMap((adminHotel) => adminHotel.hotel.rooms);
     if (rooms.length === 0)
       throw new NotFoundException('No rooms found for this admin');
-    return rooms.map((room) => {
+
+    const roomsWithReservations = await Promise.all(
+      rooms.map((room) =>
+        this.roomsRepository.findOne({
+          where: { id: room.id },
+          relations: ['reservation', 'reservation.client'],
+        }),
+      ),
+    ).then((results) => results.filter((room): room is Room => room !== null));
+
+    return roomsWithReservations.map((room) => {
       if (room.image) {
         const baseUrl = 'http://localhost:3000';
         const normalizedPath = room.image.replace(/\\/g, '/');
@@ -130,12 +142,14 @@ export class RoomsService {
     return room;
   }
 
-  async create(data: Partial<Room>, file: Express.Multer.File): Promise<Room> {
+  async create(data: CreateRoomDto, file: Express.Multer.File): Promise<Room> {
     // Validar que se haya enviado el id del hotel
-    const hotelId = (data as any).hotelId || data.hotel?.id; // Asegúrate de manejar ambos casos
-    if (!hotelId) {
+    const hotelId = Number(data.hotelId);
+    if (!hotelId || !Number.isInteger(hotelId) || hotelId <= 0) {
       throw new NotFoundException('Hotel ID is required');
     }
+
+    const price = Number(data.price);
 
     // Buscar el hotel en la base de datos
     const hotel = await this.hotelsRepository.findOne({
@@ -152,11 +166,18 @@ export class RoomsService {
     }
 
     // Crear la habitación
-    const room = this.roomsRepository.create({
-      ...data,
-      hotel, // Asocia el hotel encontrado
+    const { name, description, status, ability, available } = data;
+    const roomsPayliad: Partial<Room> = {
+      name,
+      description,
+      price,
+      status: status || 'free',
+      ability,
+      hotel,
       image: imagePath,
-    });
+      available: available !== undefined ? available : true,
+    };
+    const room = this.roomsRepository.create(roomsPayliad);
 
     // Guardar la habitación en la base de datos
     return await this.roomsRepository.save(room);

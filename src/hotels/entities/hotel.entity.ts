@@ -26,6 +26,13 @@ export class Hotel {
   @Column()
   email: string;
 
+  @Column({
+    type: 'enum',
+    enum: ['active', 'inactive', 'suspended'],
+    default: 'active',
+  })
+  status: string;
+
   @OneToMany(() => AdminHotels, (admin_hotels) => admin_hotels.hotel)
   admin_hotel: AdminHotels[];
 

@@ -2,6 +2,7 @@
 // clientIndex -> index in clientsSeed
 // roomIndex -> index in roomsSeed
 export const paymentReservationsSeed = [
+  // Pagos existentes (reservas originales)
   {
     status: 'confirmed',
     amount: 3400000,
@@ -81,5 +82,70 @@ export const paymentReservationsSeed = [
     reservationIndex: 9,
     clientIndex: 1,
     roomIndex: 7,
+  },
+  // Nuevos pagos para reservas nuevas (índices 10-17)
+  {
+    status: 'confirmed',
+    amount: 1400000,
+    payment_method: 'visa',
+    reservationIndex: 10,
+    clientIndex: 2,
+    roomIndex: 13,
+  },
+  {
+    status: 'pending',
+    amount: 720000,
+    payment_method: 'mastercard',
+    reservationIndex: 11,
+    clientIndex: 3,
+    roomIndex: 14,
+  },
+  {
+    status: 'confirmed',
+    amount: 1800000,
+    payment_method: 'paypal',
+    reservationIndex: 12,
+    clientIndex: 4,
+    roomIndex: 15,
+  },
+  {
+    status: 'canceled',
+    amount: 850000,
+    payment_method: 'visa',
+    reservationIndex: 13,
+    clientIndex: 5,
+    roomIndex: 17,
+  },
+  {
+    status: 'confirmed',
+    amount: 1400000,
+    payment_method: 'mastercard',
+    reservationIndex: 14,
+    clientIndex: 6,
+    roomIndex: 19,
+  },
+  {
+    status: 'refunded',
+    amount: 840000,
+    payment_method: 'other',
+    reservationIndex: 15,
+    clientIndex: 7,
+    roomIndex: 20,
+  },
+  {
+    status: 'confirmed',
+    amount: 3000000,
+    payment_method: 'visa',
+    reservationIndex: 16,
+    clientIndex: 0,
+    roomIndex: 22,
+  },
+  {
+    status: 'confirmed',
+    amount: 1400000,
+    payment_method: 'mastercard',
+    reservationIndex: 17,
+    clientIndex: 1,
+    roomIndex: 24,
   },
 ];

@@ -109,18 +109,66 @@ export class ClientsService {
     return client.reservation;
   }
 
-  async findClientsByAdmin(adminId: number): Promise<Client[]> {
+  async findClientsByAdmin(adminId: number): Promise<any[]> {
     const hotels = await this.adminHotelsService.findHotelsByAdmin(adminId);
     const hotelIds = hotels.map((h) => h.id);
     if (hotelIds.length === 0)
       throw new NotFoundException('No hotels assigned to this admin');
-    return this.clientRepository
+
+    const clients = await this.clientRepository
       .createQueryBuilder('client')
       .distinct(true)
       .innerJoin('client.reservation', 'reservation')
       .innerJoin('reservation.room', 'room')
       .innerJoin('room.hotel', 'hotel')
       .where('hotel.id IN (:...hotelIds)', { hotelIds })
-      .getMany();
+      .andWhere('reservation.status = :status', { status: 'confirmed' })
+      .select([
+        'client.id',
+        'client.name',
+        'client.last_name',
+        'client.email',
+        'client.phone',
+        'client.country',
+        'client.type_document',
+        'client.number_document',
+        'client.birth_date',
+        'reservation.check_in',
+        'hotel.id',
+        'hotel.name',
+      ])
+      .orderBy('reservation.check_in', 'DESC')
+      .getRawMany();
+
+    const clientsMap = new Map<number, any>();
+
+    for (const row of clients) {
+      const clientId = row.client_id;
+      
+      if (!clientsMap.has(clientId)) {
+        clientsMap.set(clientId, {
+          id: clientId,
+          name: row.client_name,
+          last_name: row.client_last_name,
+          email: row.client_email,
+          phone: row.client_phone,
+          country: row.client_country,
+          type_document: row.client_type_document,
+          number_document: row.client_number_document,
+          birth_date: row.client_birth_date,
+          hotel_afiliado: null,
+        });
+      }
+
+      const clientData = clientsMap.get(clientId);
+      if (!clientData.hotel_afiliado && row.hotel_id && row.hotel_name) {
+        clientData.hotel_afiliado = {
+          id: row.hotel_id,
+          name: row.hotel_name,
+        };
+      }
+    }
+
+    return Array.from(clientsMap.values());
   }
 }
