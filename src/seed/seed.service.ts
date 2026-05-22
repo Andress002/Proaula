@@ -1,9 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { faker } from '@faker-js/faker';
 
-// Entities
 import { User } from '../users/entities/user.entity';
 import { super_admin } from '../super-admin/entities/super-admin.entity';
 import { Hotel } from '../hotels/entities/hotel.entity';
@@ -14,19 +14,25 @@ import { Reservation } from '../booking/entities/reservation.entity';
 import { Payment } from '../payment/entities/payment.entity';
 import { PaymentReservation } from '../payment-booking/entities/payment-reservation.entity';
 
-// Seed data
 import { usersSeed } from './data/users.seed';
 import { superAdminSeed } from './data/super-admin.seed';
 import { hotelsSeed } from './data/hotels.seed';
 import { roomsSeed } from './data/rooms.seed';
 import { clientsSeed } from './data/clients.seed';
 import { adminHotelsSeed } from './data/admin-hotels.seed';
-import { reservationsSeed } from './data/reservations.seed';
 import { paymentsSeed } from './data/payments.seed';
-import { paymentReservationsSeed } from './data/payment-reservations.seed';
+
+const SEASONALITY = [1.2, 0.9, 1.0, 1.1, 1.0, 1.3, 1.3, 1.0, 0.9, 1.0, 1.0, 1.5];
+const BULK_RESERVATIONS = 10000;
+
+interface ReservationResult {
+  reservation: Reservation;
+  room: Room;
+  client: Client;
+}
 
 @Injectable()
-export class SeedService {
+export class SeedService implements OnApplicationBootstrap {
   private readonly logger = new Logger(SeedService.name);
 
   constructor(
@@ -48,30 +54,39 @@ export class SeedService {
     private readonly paymentRepository: Repository<Payment>,
     @InjectRepository(PaymentReservation)
     private readonly paymentReservationRepository: Repository<PaymentReservation>,
-    private readonly dataSource: DataSource,
   ) {}
 
+  async onApplicationBootstrap() {
+    const autoSeed = process.env.AUTO_SEED === 'true';
+    if (!autoSeed) return;
+
+    const hasData = (await this.superAdminRepository.count()) > 0;
+    if (hasData && process.env.FORCE_SEED !== 'true') {
+      this.logger.log('Seed saltado — la base de datos ya tiene datos. Usa FORCE_SEED=true para re-ejecutar.');
+      return;
+    }
+
+    await this.executeSeed();
+  }
+
   async executeSeed() {
-    this.logger.log(' Iniciando proceso de seed');
+    this.logger.log('Iniciando proceso de seed');
 
     await this.deleteTables();
 
-    // Insertar datos en orden de dependencias
+    faker.seed(12345);
+
     const superAdmins = await this.seedSuperAdmins();
     const users = await this.seedUsers();
     const hotels = await this.seedHotels();
     const rooms = await this.seedRooms(hotels);
     const clients = await this.seedClients();
-    const adminHotels = await this.seedAdminHotels(users, hotels);
-    const reservations = await this.seedReservations(rooms, clients);
-    const payments = await this.seedPayments(users);
-    const paymentReservations = await this.seedPaymentReservations(
-      reservations,
-      clients,
-      rooms,
-    );
+    await this.seedAdminHotels(users, hotels);
+    await this.seedPayments(users);
+    const reservationResults = await this.seedBulkReservations(rooms, clients);
+    const paymentReservations = await this.seedBulkPaymentReservations(reservationResults);
 
-    this.logger.log(' Seed completado exitosamente');
+    this.logger.log('Seed completado exitosamente');
 
     return {
       message: 'Seed ejecutado exitosamente',
@@ -81,9 +96,9 @@ export class SeedService {
         hotels: hotels.length,
         rooms: rooms.length,
         clients: clients.length,
-        adminHotels: adminHotels.length,
-        reservations: reservations.length,
-        payments: payments.length,
+        adminHotels: adminHotelsSeed.length,
+        reservations: reservationResults.length,
+        payments: paymentsSeed.length,
         paymentReservations: paymentReservations.length,
       },
     };
@@ -92,11 +107,7 @@ export class SeedService {
   private async deleteTables() {
     this.logger.log('Eliminando datos existentes');
 
-    // Orden inverso de dependencias para evitar errores de FK
-    await this.paymentReservationRepository
-      .createQueryBuilder()
-      .delete()
-      .execute();
+    await this.paymentReservationRepository.createQueryBuilder().delete().execute();
     await this.paymentRepository.createQueryBuilder().delete().execute();
     await this.reservationRepository.createQueryBuilder().delete().execute();
     await this.adminHotelsRepository.createQueryBuilder().delete().execute();
@@ -110,75 +121,59 @@ export class SeedService {
   }
 
   private async seedSuperAdmins(): Promise<super_admin[]> {
-    this.logger.log(' Insertando super administradores');
-    const createdSuperAdmins: super_admin[] = [];
-
+    this.logger.log('Insertando super administradores');
+    const created: super_admin[] = [];
     for (const data of superAdminSeed) {
       const hashedPassword = await bcrypt.hash(data.password, 10);
-      const superAdmin = this.superAdminRepository.create({
-        ...data,
-        password: hashedPassword,
-      });
-      createdSuperAdmins.push(await this.superAdminRepository.save(superAdmin));
+      const entity = this.superAdminRepository.create({ ...data, password: hashedPassword });
+      created.push(await this.superAdminRepository.save(entity));
     }
-
-    this.logger.log(` ${createdSuperAdmins.length} super admins creados`);
-    return createdSuperAdmins;
+    this.logger.log(` ${created.length} super admins creados`);
+    return created;
   }
 
   private async seedUsers(): Promise<User[]> {
-    this.logger.log(' Insertando usuarios');
-    const createdUsers: User[] = [];
-
+    this.logger.log('Insertando usuarios');
+    const created: User[] = [];
     for (const data of usersSeed) {
       const hashedPassword = await bcrypt.hash(data.password, 10);
-      const user = this.userRepository.create({
-        ...data,
-        password: hashedPassword,
-      });
-      createdUsers.push(await this.userRepository.save(user));
+      const user = this.userRepository.create({ ...data, password: hashedPassword });
+      created.push(await this.userRepository.save(user));
     }
-
-    this.logger.log(` ${createdUsers.length} usuarios creados`);
-    return createdUsers;
+    this.logger.log(` ${created.length} usuarios creados`);
+    return created;
   }
 
   private async seedHotels(): Promise<Hotel[]> {
     this.logger.log('Insertando hoteles');
-    const createdHotels: Hotel[] = [];
-
+    const created: Hotel[] = [];
     for (const data of hotelsSeed) {
       const hotel = this.hotelRepository.create(data);
-      createdHotels.push(await this.hotelRepository.save(hotel));
+      created.push(await this.hotelRepository.save(hotel));
     }
-
-    this.logger.log(` ${createdHotels.length} hoteles creados`);
-    return createdHotels;
+    this.logger.log(` ${created.length} hoteles creados`);
+    return created;
   }
 
   private async seedRooms(hotels: Hotel[]): Promise<Room[]> {
     this.logger.log('Insertando habitaciones');
-    const createdRooms: Room[] = [];
-
+    const created: Room[] = [];
     for (const data of roomsSeed) {
       const { hotelIndex, image, ...roomData } = data;
-      const roomEntity = new Room();
-      Object.assign(roomEntity, {
+      const room = this.roomRepository.create({
         ...roomData,
         ...(image ? { image } : {}),
         hotel: hotels[hotelIndex],
       });
-      createdRooms.push(await this.roomRepository.save(roomEntity));
+      created.push(await this.roomRepository.save(room));
     }
-
-    this.logger.log(`  ${createdRooms.length} habitaciones creadas`);
-    return createdRooms;
+    this.logger.log(` ${created.length} habitaciones creadas`);
+    return created;
   }
 
   private async seedClients(): Promise<Client[]> {
-    this.logger.log(' Insertando clientes');
-    const createdClients: Client[] = [];
-
+    this.logger.log('Insertando clientes');
+    const created: Client[] = [];
     for (const data of clientsSeed) {
       const hashedPassword = await bcrypt.hash(data.password, 10);
       const client = this.clientRepository.create({
@@ -186,64 +181,30 @@ export class SeedService {
         password: hashedPassword,
         birth_date: new Date(data.birth_date),
       });
-      createdClients.push(await this.clientRepository.save(client));
+      created.push(await this.clientRepository.save(client));
     }
-
-    this.logger.log(` ${createdClients.length} clientes creados`);
-    return createdClients;
+    this.logger.log(` ${created.length} clientes creados`);
+    return created;
   }
 
-  private async seedAdminHotels(
-    users: User[],
-    hotels: Hotel[],
-  ): Promise<AdminHotels[]> {
-    this.logger.log(' Insertando admin-hotels');
-    const createdAdminHotels: AdminHotels[] = [];
-
+  private async seedAdminHotels(users: User[], hotels: Hotel[]): Promise<AdminHotels[]> {
+    this.logger.log('Insertando admin-hotels');
+    const created: AdminHotels[] = [];
     for (const data of adminHotelsSeed) {
       const adminHotel = this.adminHotelsRepository.create({
         user: users[data.userIndex],
         hotel: hotels[data.hotelIndex],
       });
-      createdAdminHotels.push(
-        await this.adminHotelsRepository.save(adminHotel),
-      );
+      created.push(await this.adminHotelsRepository.save(adminHotel));
     }
-
-    this.logger.log(` ${createdAdminHotels.length} admin-hotels creados`);
-    return createdAdminHotels;
-  }
-
-  private async seedReservations(
-    rooms: Room[],
-    clients: Client[],
-  ): Promise<Reservation[]> {
-    this.logger.log('Insertando reservaciones');
-    const createdReservations: Reservation[] = [];
-
-    for (const data of reservationsSeed) {
-      const { roomIndex, clientIndex, ...reservationData } = data;
-      const reservation = this.reservationRepository.create({
-        ...reservationData,
-        check_in: new Date(reservationData.check_in),
-        check_out: new Date(reservationData.check_out),
-        room: rooms[roomIndex],
-        client: clients[clientIndex],
-      });
-      createdReservations.push(
-        await this.reservationRepository.save(reservation),
-      );
-    }
-
-    this.logger.log(` ${createdReservations.length} reservaciones creadas`);
-    return createdReservations;
+    this.logger.log(` ${created.length} admin-hotels creados`);
+    return created;
   }
 
   private async seedPayments(users: User[]): Promise<Payment[]> {
-    this.logger.log(' Insertando pagos de servicios');
-    const createdPayments: Payment[] = [];
+    this.logger.log('Insertando pagos de servicios');
+    const created: Payment[] = [];
     const now = new Date();
-
     for (const data of paymentsSeed) {
       const { userIndex, ...paymentData } = data;
       const payment = this.paymentRepository.create({
@@ -252,41 +213,152 @@ export class SeedService {
         created_at: now,
         updated_at: now,
       });
-      createdPayments.push(await this.paymentRepository.save(payment));
+      created.push(await this.paymentRepository.save(payment));
     }
-
-    this.logger.log(` ${createdPayments.length} pagos de servicios creados`);
-    return createdPayments;
+    this.logger.log(` ${created.length} pagos de servicios creados`);
+    return created;
   }
 
-  private async seedPaymentReservations(
-    reservations: Reservation[],
-    clients: Client[],
+  private async seedBulkReservations(
     rooms: Room[],
-  ): Promise<PaymentReservation[]> {
-    this.logger.log(' Insertando pagos de reservaciones');
-    const createdPaymentReservations: PaymentReservation[] = [];
-    const now = new Date();
+    clients: Client[],
+  ): Promise<ReservationResult[]> {
+    this.logger.log(`Generando ${BULK_RESERVATIONS} reservas masivas...`);
 
-    for (const data of paymentReservationsSeed) {
-      const { reservationIndex, clientIndex, roomIndex, ...paymentData } = data;
-      const paymentReservation = this.paymentReservationRepository.create({
-        ...paymentData,
-        payment_date: now,
-        reservation: reservations[reservationIndex],
-        client: clients[clientIndex],
-        room: rooms[roomIndex],
-        created_at: now,
-        updated_at: now,
-      });
-      createdPaymentReservations.push(
-        await this.paymentReservationRepository.save(paymentReservation),
-      );
+    const results: ReservationResult[] = [];
+    const batch: Array<{
+      room: Room;
+      client: Client;
+      checkIn: Date;
+      checkOut: Date;
+      createdAt: Date;
+      updatedAt: Date;
+      status: string;
+    }> = [];
+
+    for (let i = 0; i < BULK_RESERVATIONS; i++) {
+      const room = rooms[Math.floor(Math.random() * rooms.length)];
+      const client = clients[Math.floor(Math.random() * clients.length)];
+
+      const isHistorical = Math.random() < 0.7;
+      let checkIn: Date;
+
+      if (isHistorical) {
+        const monthWeights = Array.from({ length: 12 }, (_, j) => {
+          const d = new Date();
+          d.setMonth(d.getMonth() - j);
+          return SEASONALITY[d.getMonth()];
+        });
+        const totalWeight = monthWeights.reduce((a, b) => a + b, 0);
+        let r = Math.random() * totalWeight;
+        let selectedIdx = 0;
+        for (let j = 0; j < 12; j++) {
+          r -= monthWeights[j];
+          if (r <= 0) { selectedIdx = j; break; }
+        }
+        const targetMonth = new Date();
+        targetMonth.setMonth(targetMonth.getMonth() - selectedIdx);
+        const monthStart = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 1);
+        const monthEnd = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0);
+        checkIn = faker.date.between({ from: monthStart, to: monthEnd });
+      } else {
+        checkIn = faker.date.future({ years: 0.5 });
+      }
+
+      const nights = faker.number.int({ min: 1, max: 14 });
+      const checkOut = new Date(checkIn);
+      checkOut.setDate(checkOut.getDate() + nights);
+
+      const createdAt = isHistorical
+        ? faker.date.between({ from: new Date(checkIn.getTime() - 30 * 24 * 60 * 60 * 1000), to: checkIn })
+        : faker.date.past({ years: 1 });
+      const updatedAt = faker.date.between({ from: createdAt, to: checkOut });
+
+      const status = isHistorical
+        ? 'confirmed'
+        : faker.helpers.arrayElement(['confirmed', 'canceled', 'refunded']);
+
+      batch.push({ room, client, checkIn, checkOut, createdAt, updatedAt, status });
+
+      if (batch.length >= 500 || i === BULK_RESERVATIONS - 1) {
+        for (const b of batch) {
+          const conflict = await this.reservationRepository
+            .createQueryBuilder('r')
+            .where('r.room_id = :roomId', { roomId: b.room.id })
+            .andWhere(':checkIn < r.check_out AND :checkOut > r.check_in', {
+              checkIn: b.checkIn,
+              checkOut: b.checkOut,
+            })
+            .getCount();
+
+          if (conflict === 0) {
+            const reservation = this.reservationRepository.create({
+              room: b.room,
+              client: b.client,
+              check_in: b.checkIn,
+              check_out: b.checkOut,
+              status: b.status as any,
+              created_at: b.createdAt,
+              updated_at: b.updatedAt,
+            });
+            const saved = await this.reservationRepository.save(reservation);
+            results.push({ reservation: saved, room: b.room, client: b.client });
+
+            if (b.status === 'confirmed') {
+              await this.roomRepository.update(b.room.id, { status: 'booked' as any });
+            }
+          }
+        }
+        batch.length = 0;
+        this.logger.log(`  ${results.length} reservas creadas...`);
+      }
     }
 
-    this.logger.log(
-      ` ${createdPaymentReservations.length} pagos de reservaciones creados`,
-    );
-    return createdPaymentReservations;
+    this.logger.log(` ${results.length} reservas creadas en total`);
+    return results;
+  }
+
+  private async seedBulkPaymentReservations(
+    reservationResults: ReservationResult[],
+  ): Promise<PaymentReservation[]> {
+    this.logger.log('Insertando pagos de reservas masivos...');
+    const created: PaymentReservation[] = [];
+    const now = new Date();
+
+    for (const { reservation, room, client } of reservationResults) {
+      const isHistorical = reservation.check_in < now;
+      const paymentStatus = isHistorical
+        ? 'confirmed'
+        : faker.helpers.arrayElement(['pending', 'confirmed', 'canceled', 'refunded']);
+
+      const nights = Math.ceil(
+        (reservation.check_out.getTime() - reservation.check_in.getTime()) /
+          (1000 * 60 * 60 * 24),
+      );
+      const amount = Math.round(
+        room.price * nights * faker.number.float({ min: 0.85, max: 1.15 }),
+      );
+
+      const paymentReservation = this.paymentReservationRepository.create({
+        payment_date: isHistorical ? reservation.check_in : reservation.updated_at,
+        status: paymentStatus as any,
+        amount,
+        payment_method: faker.helpers.arrayElement(['visa', 'mastercard', 'paypal', 'other']),
+        reservation,
+        client,
+        room,
+        created_at: reservation.created_at,
+        updated_at: reservation.updated_at,
+      });
+
+      created.push(await this.paymentReservationRepository.save(paymentReservation));
+
+      if (paymentStatus === 'confirmed') {
+        await this.roomRepository.update(room.id, { status: 'busy' as any });
+      }
+    }
+
+    this.logger.log(` ${created.length} pagos de reservas creados`);
+    return created;
   }
 }
